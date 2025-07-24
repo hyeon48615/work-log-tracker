@@ -167,6 +167,11 @@
       params.set("date", dateEL.value);
       location.href = '/?' + params.toString();
     });
+
+    document.getElementById('btnLogout').addEventListener('click', async function () {
+      await axiosInstance.get('/api/auth/logout');
+      location.href = '/login';
+    });
   });
 </script>
 </body>
