@@ -51,7 +51,10 @@ public class SpringSecurityConfig {
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/", "/api/auth/login").authenticated().anyRequest().permitAll())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(  "/v3/api-docs/**",  "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/", "/api/auth/**", "/api/user/list").permitAll()
+                        .anyRequest().authenticated())
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilter(corsConfig.corsFilter())
