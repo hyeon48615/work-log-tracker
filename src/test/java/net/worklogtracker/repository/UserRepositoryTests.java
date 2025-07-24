@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
+
 @SpringBootTest
 public class UserRepositoryTests {
 
@@ -18,11 +20,13 @@ public class UserRepositoryTests {
     @Test
     public void testInsert() {
         UserEntity user = UserEntity.builder()
-                .name("user001")
-                .id("user001")
-                .pwd(passwordEncoder.encode("a123456789!"))
+                .username("user001")
+                .password(passwordEncoder.encode("a123456789!"))
                 .build();
 
         userRepository.save(user);
+
+        List<UserEntity> users = userRepository.findAll();
+        System.out.println(users.toString());
     }
 }
