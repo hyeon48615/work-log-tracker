@@ -9,5 +9,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserResponse {
     private String username;
-    private String password;
 }
