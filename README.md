@@ -28,6 +28,7 @@ Spring Boot 기반 출퇴근 기록 웹 애플리케이션입니다.
 ### 1. 프로젝트 클론
 ```bash
 git clone https://github.com/hyeon48615/work-log-tracker.git
+cd work-log-tracker
 ```
 
 <br>
