@@ -25,12 +25,6 @@
           height: 100%;
         }
 
-        .card-body {
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-        }
-
         .table-wrapper {
           flex: 1;
           overflow-y: auto;
@@ -47,6 +41,15 @@
           text-align: center;
           white-space: nowrap;
         }
+
+        @media (max-width: 575.98px) {
+          .col-md-4 {
+            height: auto;
+          }
+          .col-md-8 {
+            flex-grow: 1;
+          }
+        }
     </style>
 </head>
 <body>
@@ -60,8 +63,8 @@
   </div>
 </nav>
 <div class="container my-4">
-  <div class="row">
-    <div class="col-md-4 mb-4">
+  <div class="row d-flex flex-md-row flex-column">
+    <div class="col-12 col-md-4 mb-4">
       <div class="card">
         <div class="card-body">
           <h5 class="card-title mb-3">오늘 근무</h5>
@@ -70,15 +73,15 @@
             <p>퇴근시간: <span id="txtEnd" th:text="${mylog.end_time != null ? #temporals.format(mylog.end_time, 'HH:mm:ss') : '-'}"></span></p>
           </div>
           <div class="mb-3 d-flex gap-2">
-            <button id="btnStart" class="btn btn-success w-100">출근</button>
-            <button id="btnEnd" class="btn btn-secondary w-100">퇴근</button>
+            <button id="btnStart" class="btn btn-success w-100" disabled>출근</button>
+            <button id="btnEnd" class="btn btn-secondary w-100" disabled>퇴근</button>
           </div>
         </div>
       </div>
     </div>
-    <div class="col-md-8 d-flex">
+    <div class="col-12 col-md-8 d-flex">
       <div class="card flex-grow-1">
-        <div class="card-body">
+        <div class="card-body d-flex flex-column h-100">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="card-title">전체 직원 근무 기록</h5>
             <input name="date" type="date" class="form-control" style="width: 150px;"/>
@@ -112,22 +115,48 @@
 <script th:inline="javascript">
   const axiosInstance = axios.create({ withCredentials: true });
 
-  let mylog = /*[[${mylog}]]*/ {};
+  function getFormmatedDate() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+  }
 
   document.addEventListener('DOMContentLoaded', function () {
+    const mylog = /*[[${mylog}]]*/ {};
+
+    // 날짜 관련 이벤트 및 초기화
+    const params = new URLSearchParams(location.search);
+    let date = params.get("date");
+
+    if (!date) date = getFormmatedDate();
+
+    const dateEL = document.querySelector('input[name="date"]');
+    dateEL.value = date;
+
+    dateEL.addEventListener('change', function () {
+      params.set("date", dateEL.value);
+      location.href = '/?' + params.toString();
+    });
+
+    // 출퇴근 버튼
     const btnStart = document.getElementById('btnStart');
     const btnEnd = document.getElementById('btnEnd');
 
-    if (mylog.start_time == null) {
-      btnEnd.disabled = true;
-    }
+    const now = getFormmatedDate();
 
-    if (mylog.start_time != null) {
-      btnStart.disabled = true;
-    }
-
-    if (mylog.end_time != null) {
-      btnEnd.disabled = true;
+    if (date === now) {
+      if (mylog.start_time == null) {
+        btnStart.disabled = false;
+        btnEnd.disabled = true;
+      } else if (mylog.start_time != null && mylog.end_time == null) {
+        btnStart.disabled = true;
+        btnEnd.disabled = false;
+      } else {
+        btnStart.disabled = true;
+        btnEnd.disabled = true;
+      }
     }
 
     btnStart.addEventListener('click', async function () {
@@ -148,24 +177,6 @@
         alert("퇴근 기록을 실패했습니다.");
         console.log(error);
       }
-    });
-
-    const params = new URLSearchParams(location.search);
-    let date = params.get("date");
-    if (!date) {
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
-      date = `${year}-${month}-${day}`;
-    }
-
-    const dateEL = document.querySelector('input[name="date"]');
-    dateEL.value = date;
-
-    dateEL.addEventListener('change', function () {
-      params.set("date", dateEL.value);
-      location.href = '/?' + params.toString();
     });
 
     document.getElementById('btnLogout').addEventListener('click', async function () {
