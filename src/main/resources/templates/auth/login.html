@@ -28,19 +28,14 @@
         </div>
     </div>
     <script th:inline="javascript">
+        const axiosInstance = axios.create({ withCredentials: true });
+
         document.getElementById('btnLogin').addEventListener('click', async function () {
-            const username = document.getElementById('username');
-            const password = document.getElementById('password');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
 
             try {
-                const request = {
-                    username: username.value,
-                    password: password.value
-                };
-                const response = await axios.post('/api/auth/login', request);
-                const token = response.data.access_token;
-
-                localStorage.setItem('jwtToken', token);
+                await axiosInstance.post('/api/auth/login', { username, password });
                 location.href = '/';
             } catch (error) {
                 if (error.response && error.response.status === 401) {

@@ -6,14 +6,12 @@ import net.worklogtracker.dto.UserResponse;
 import net.worklogtracker.entity.UserEntity;
 import net.worklogtracker.repository.UserRepository;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +31,7 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) {
         UserEntity entity = userRepository.findById(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Cannot find user. id: " + username));
 

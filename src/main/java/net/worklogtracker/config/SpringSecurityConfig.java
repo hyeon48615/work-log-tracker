@@ -52,12 +52,12 @@ public class SpringSecurityConfig {
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(  "/v3/api-docs/**",  "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/login", "/signup").permitAll()
                         .requestMatchers("/api/auth/**", "/api/temp/user/list").permitAll()
                         .anyRequest().authenticated())
+                .exceptionHandling(e -> e.authenticationEntryPoint(authenticationHandler))
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilter(corsConfig.corsFilter())

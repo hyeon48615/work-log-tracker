@@ -2,6 +2,7 @@ package net.worklogtracker.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
@@ -33,17 +34,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = parseBearerToken(request);
 
         if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            String username = jwtUtil.extractUsername(token);
-            log.info("Autenticated user. id: " + username);
+            try {
+                String username = jwtUtil.extractUsername(token);
+                UserDetails userDetails = userService.loadUserByUsername(username);
 
-            UserDetails userDetails = userService.loadUserByUsername(username);
-            if (jwtUtil.validateToken(token, userDetails)) {
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (jwtUtil.validateToken(token, userDetails)) {
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    log.info("JWT Authentication Success. username: " + username);
+                }
+            } catch (Exception e) {
+                log.warn("JWT 인증 실패: {}", e.getMessage());
             }
         }
 
@@ -56,6 +61,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
+
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("jwtToken".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
         return null;
     }
 }

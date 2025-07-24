@@ -11,6 +11,7 @@ import net.worklogtracker.dto.AuthRequest;
 import net.worklogtracker.dto.AuthResponse;
 import net.worklogtracker.service.AuthService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +41,18 @@ public class AuthApiController {
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         try {
             String token = authService.authenticateAndGenerateToken(request);
-            return ResponseEntity.ok(new AuthResponse(token));
+
+            ResponseCookie cookie = ResponseCookie.from("jwtToken", token)
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/")
+                    .maxAge(60 * 60)
+                    .sameSite("Lax")
+                    .build();
+
+            return ResponseEntity.ok()
+                    .header("Set-Cookie", cookie.toString())
+                    .body(new AuthResponse(token));
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
