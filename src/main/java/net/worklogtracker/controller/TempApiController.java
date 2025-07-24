@@ -18,14 +18,14 @@ import java.util.List;
 @Tag(name="user")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/user")
-public class UserApiController {
+@RequestMapping("/api/temp")
+public class TempApiController {
 
     private final UserService userService;
 
     @Operation(summary = "모든 사용자 조회", security = @SecurityRequirement(name = ""))
     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = UserResponse.class))))
-    @GetMapping("/list")
+    @GetMapping("/user/list")
     public ResponseEntity<?> getUsers() {
         List<UserResponse> result = userService.findUsers();
         return ResponseEntity.ok(result);
