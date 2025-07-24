@@ -2,6 +2,7 @@ package net.worklogtracker.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import net.worklogtracker.security.AuthenticationHandler;
 import net.worklogtracker.security.JwtAuthenticationFilter;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +29,7 @@ public class SpringSecurityConfig {
 
     private final CorsConfig corsConfig;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final UserDetailsService userDetailsService;
+    private final AuthenticationHandler authenticationHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -51,9 +52,10 @@ public class SpringSecurityConfig {
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(  "/v3/api-docs/**",  "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/", "/login", "/signup").permitAll()
+                        .requestMatchers("/login", "/signup").permitAll()
                         .requestMatchers("/api/auth/**", "/api/temp/user/list").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(sessionManagement ->
